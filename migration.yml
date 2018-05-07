@@ -1,0 +1,67 @@
+---
+#global settings
+pid_dir: '~/.pg_chameleon/pid/'
+log_dir: '~/.pg_chameleon/logs/'
+log_dest: file
+log_level: info
+log_days_keep: 10
+rollbar_key: ''
+rollbar_env: ''
+
+# type_override allows the user to override the default type conversion into a different one. 
+type_override:
+    "tinyint(1)":
+        override_to: boolean
+        override_tables:
+            - "*"
+
+
+#postgres  destination connection
+hedgelog:
+    host: "localhost"
+    port: "19020"
+    config: "~/.pg_chameleon/log_conf.json"
+
+pg_conn:
+    host: "172.17.0.3"
+    port: "5432"    
+    user: "replica"
+    password: "replica"
+    database: "destiny"
+    charset: "utf8"
+    
+sources:
+    mysql:
+        db_conn:
+            host: "172.17.0.2"
+            port: "3306"
+            user: "replica"
+            password: "replica"
+            charset: 'utf8'
+            connect_timeout: 10
+        schema_mappings:
+                source: source
+        # set tables for replilcation
+        limit_tables:
+                - source.upsert
+                - source.tj_update
+        # exclude here tables
+        skip_tables:
+        grant_select_to:
+                - replica
+        lock_timeout: "120s"
+        my_server_id: 1
+        replica_batch_size: 10
+        replay_max_rows: 10
+        batch_retention: '1 day'
+        copy_max_memory: "300M"
+        # file - chameleon generate csv, then load it, direct - onthefly
+        copy_mode: 'direct'  
+        out_dir: /tmp
+        sleep_loop: 1
+        on_error_replay: continue
+        type: mysql
+
+
+
+
